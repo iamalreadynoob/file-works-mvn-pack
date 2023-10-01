@@ -77,6 +77,44 @@ public class CSV
         return new ArrayList<>();
     }
 
+    public void addColumn(String header, ArrayList<String> column, boolean isRemainNull)
+    {
+        if (!headers.contains(header))
+        {
+            if (isRemainNull && column.size() <= columns.get(0).size())
+            {
+                if (column.size() != columns.get(0).size())
+                    while (column.size() != columns.get(0).size())
+                        column.add(nullSign);
+
+                headers.add(header);
+                columns.add(column);
+            }
+            else if (!isRemainNull && columns.get(0).size() == column.size())
+            {
+                headers.add(header);
+                columns.add(column);
+            }
+        }
+    }
+
+    public void deleteColumn(String header)
+    {
+        if (headers.contains(header))
+        {
+            int index = headers.indexOf(header);
+            headers.remove(index);
+            columns.remove(index);
+        }
+
+    }
+
+    public void setHeaderName(String header, String newHeaderName)
+    {
+        if (headers.contains(header) && !headers.contains(newHeaderName))
+            headers.set(headers.indexOf(header), newHeaderName);
+    }
+
     public void addRow(ArrayList<String> rows)
     {
         boolean flag = true;
@@ -166,7 +204,16 @@ public class CSV
             ArrayList<String> keyColumn = getColumn(keyHeader);
             ArrayList<String> valColumn = getColumn(valueHeader);
 
-            //filter them to unique
+            ArrayList<String> keys = new ArrayList<>();
+
+            for (int i = 0; i < keyColumn.size(); i++)
+            {
+                if (!keys.contains(keyColumn.get(i)))
+                {
+                    keys.add(keyColumn.get(i));
+                    map.put(keyColumn.get(i), valColumn.get(i));
+                }
+            }
         }
 
         return map;
@@ -174,7 +221,33 @@ public class CSV
 
     public void save()
     {
+        ArrayList<String> lines = new ArrayList<>();
 
+        String headerLine = null;
+        for (int i = 0; i < headers.size(); i++)
+        {
+            if (i == 0) headerLine = headers.get(i);
+            else headerLine += "," + headers.get(i);
+        }
+        lines.add(headerLine);
+
+        for (int i = 0; i < columns.get(0).size(); i++)
+        {
+            String line = null;
+
+            for (int j = 0; j < headers.size(); j++)
+            {
+                if (j == 0) line = columns.get(j).get(i);
+                else line += "," + columns.get(j).get(i);
+            }
+
+            lines.add(line);
+        }
+
+        TextCommunication.write(path, lines);
+
+        headers.clear();
+        columns.clear();
     }
 
     private boolean isDB(ArrayList<String> lines)
