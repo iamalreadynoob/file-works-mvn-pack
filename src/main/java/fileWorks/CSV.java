@@ -34,8 +34,52 @@ public class CSV
         nullSign = "NULL";
     }
 
+    public void create(ArrayList<ArrayList<String>> columnsWithHeaders)
+    {
+        clear();
+
+        for (int i = 0; i < columnsWithHeaders.size(); i++)
+        {
+            headers.add(columnsWithHeaders.get(i).get(0));
+            columns.add(new ArrayList<>());
+        }
+
+        for (int i = 1; i < columnsWithHeaders.get(0).size(); i++)
+        {
+            for (int j = 0; j < columnsWithHeaders.size(); j++)
+                columns.get(j).add(columnsWithHeaders.get(j).get(i));
+        }
+    }
+
+    public void create(ArrayList<String> headers, ArrayList<ArrayList<String>> columns)
+    {
+        clear();
+
+        if (headers.size() == columns.size())
+        {
+            boolean flag = true;
+
+            for (int i = 0; i < columns.size(); i++)
+                if (columns.get(0).size() != columns.get(i).size())
+                {
+                    flag = false;
+                    break;
+                }
+
+            if (flag)
+            {
+                this.headers = headers;
+                this.columns = columns;
+            }
+        }
+
+
+    }
+
     public void scan()
     {
+        clear();
+
         ArrayList<String> rawLines = TextCommunication.read(path);
         ArrayList<String> lines = new ArrayList<>();
         for (String ln: rawLines) if (!ln.isBlank() && !ln.isEmpty()) lines.add(ln);
@@ -60,6 +104,12 @@ public class CSV
             System.err.println("The database is broken, contains much or less cells at least in one row");
             System.exit(1);
         }
+    }
+
+    public void clear()
+    {
+        headers.clear();
+        columns.clear();
     }
 
     public ArrayList<String> getHeaders() {return headers;}
@@ -246,8 +296,7 @@ public class CSV
 
         TextCommunication.write(path, lines);
 
-        headers.clear();
-        columns.clear();
+        clear();
     }
 
     private boolean isDB(ArrayList<String> lines)
